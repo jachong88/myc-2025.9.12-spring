@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import web.common.dto.ApiError;
 import web.common.dto.ApiResponse;
 import web.common.i18n.ErrorMessageResolver;
-import web.common.util.Ulids;
+import web.common.request.RequestIdHolder;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -31,7 +31,7 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(AppException.class)
   public ResponseEntity<ApiResponse<Void>> handleAppException(AppException ex, Locale locale) {
-    String requestId = Ulids.newUlid();
+String requestId = RequestIdHolder.getOrCreate();
     ErrorCode code = ex.getErrorCode();
     HttpStatus status = ex.getHttpStatus();
     String message = messages.resolve(code.messageKey(), ex.getArgs());
@@ -41,7 +41,7 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiResponse<Void>> handleValidation(MethodArgumentNotValidException ex, Locale locale) {
-    String requestId = Ulids.newUlid();
+String requestId = RequestIdHolder.getOrCreate();
     ErrorCode code = ErrorCode.VALIDATION_FAILED;
     HttpStatus status = code.httpStatus();
     Map<String, Object> details = new HashMap<>();
@@ -55,7 +55,7 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(ConstraintViolationException.class)
   public ResponseEntity<ApiResponse<Void>> handleConstraintViolation(ConstraintViolationException ex, Locale locale) {
-    String requestId = Ulids.newUlid();
+String requestId = RequestIdHolder.getOrCreate();
     ErrorCode code = ErrorCode.ARGUMENT_INVALID;
     HttpStatus status = code.httpStatus();
     Map<String, Object> details = new HashMap<>();
@@ -73,7 +73,7 @@ public class ApiExceptionHandler {
 
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiResponse<Void>> handleUnknown(Exception ex, Locale locale) {
-    String requestId = Ulids.newUlid();
+String requestId = RequestIdHolder.getOrCreate();
     ErrorCode code = ErrorCode.INTERNAL;
     HttpStatus status = code.httpStatus();
     String message = messages.resolve(code.messageKey());
