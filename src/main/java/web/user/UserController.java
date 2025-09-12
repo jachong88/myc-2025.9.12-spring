@@ -10,6 +10,7 @@ import web.common.request.RequestIdHolder;
 import web.user.dto.UserCreateRequest;
 import web.user.dto.UserUpdateRequest;
 import web.user.dto.UserResponse;
+import web.user.dto.UserListItemResponse;
 
 import java.net.URI;
 import java.util.List;
@@ -47,15 +48,22 @@ public class UserController {
 
   @GetMapping
   @Operation(summary = "List users (paginated)")
-  public ResponseEntity<ApiResponse<List<UserResponse>>> list(
-      @RequestParam(defaultValue = "0") int page,
-      @RequestParam(defaultValue = "20") int size
+  public ResponseEntity<ApiResponse<List<UserListItemResponse>>> list(
+      @RequestParam(required = false) Integer page,
+      @RequestParam(required = false) Integer size,
+      @RequestParam(required = false) String countryId,
+      @RequestParam(required = false) String provinceId,
+      @RequestParam(required = false, name = "name") String name,
+      @RequestParam(required = false) String phone,
+      @RequestParam(required = false) String email,
+      @RequestParam(required = false, name = "role") String role,
+      @RequestParam(required = false) Boolean deleted
   ) {
-    Page<UserResponse> result = service.list(page, size);
+    Page<UserListItemResponse> result = service.find(page, size, countryId, provinceId, name, phone, email, role, deleted);
     String rid = RequestIdHolder.getOrCreate();
     Map<String, Object> meta = Map.of(
-        "page", page,
-        "size", size,
+        "page", (page == null ? 0 : page),
+        "size", (size == null ? 20 : size),
         "totalItems", result.getTotalElements(),
         "totalPages", result.getTotalPages(),
         "hasNext", result.hasNext()

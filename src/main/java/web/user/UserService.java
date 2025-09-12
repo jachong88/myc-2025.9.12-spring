@@ -93,6 +93,73 @@ public class UserService {
     return repo.findByDeletedAtIsNull(pr).map(UserService::toResponse);
   }
 
+  @Transactional(readOnly = true)
+  public Page<web.user.dto.UserListItemResponse> find(
+      Integer page, Integer size,
+      String countryId, String provinceId,
+      String name, String phone, String email,
+      String role,
+      Boolean deleted
+  ) {
+    int p = (page == null ? 0 : page);
+    int s = (size == null ? 20 : size);
+    if (p < 0 || s <= 0 || s > 200) {
+      throw new AppException(ErrorCode.ARGUMENT_INVALID, Map.of("page", p, "size", s));
+    }
+
+    // Build specification
+    org.springframework.data.jpa.domain.Specification<UserEntity> spec = (root, cq, cb) -> {
+      java.util.List<jakarta.persistence.criteria.Predicate> preds = new java.util.ArrayList<>();
+
+      // deleted filter
+      if (deleted != null) {
+        if (deleted) preds.add(cb.isNotNull(root.get("deletedAt")));
+        else preds.add(cb.isNull(root.get("deletedAt")));
+      } else {
+        // default to active only if not specified
+        preds.add(cb.isNull(root.get("deletedAt")));
+      }
+
+      if (countryId != null && !countryId.isBlank()) {
+        preds.add(cb.equal(root.get("countryId"), countryId));
+      }
+      if (provinceId != null && !provinceId.isBlank()) {
+        preds.add(cb.equal(root.get("provinceId"), provinceId));
+      }
+      if (role != null && !role.isBlank()) {
+        // Interpret role as roleId for now
+        preds.add(cb.equal(root.get("roleId"), role));
+      }
+      if (name != null && !name.isBlank()) {
+        String like = "%" + name.trim().toLowerCase() + "%";
+        preds.add(cb.like(cb.lower(root.get("fullName")), like));
+      }
+      if (email != null && !email.isBlank()) {
+        String like = "%" + email.trim().toLowerCase() + "%";
+        preds.add(cb.like(cb.lower(root.get("email")), like));
+      }
+      if (phone != null && !phone.isBlank()) {
+        String like = "%" + phone.trim() + "%";
+        preds.add(cb.like(root.get("phone"), like));
+      }
+
+      return cb.and(preds.toArray(jakarta.persistence.criteria.Predicate[]::new));
+    };
+
+    PageRequest pr = PageRequest.of(p, s, Sort.by("createdAt").descending());
+    Page<UserEntity> pageResult = repo.findAll(spec, pr);
+
+    return pageResult.map(u -> new web.user.dto.UserListItemResponse(
+        u.getId(),
+        u.getFullName(),
+        u.getEmail(),
+        u.getPhone(),
+        u.getRoleId(), // placeholder until roles table provides a name
+        u.getCountryId(), // TODO: map to country name if reference table is present
+        u.getProvinceId()
+    ));
+  }
+
   @Transactional
   public UserResponse update(String id, UserUpdateRequest req) {
     UserEntity e = repo.findByIdAndDeletedAtIsNull(id).orElseThrow(() ->
