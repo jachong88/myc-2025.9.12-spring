@@ -1,6 +1,5 @@
 package web.rbac;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import web.user.entity.UserEntity;
@@ -14,9 +13,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class AuthorizationService {
-
-  @Value("${app.rbac.enforce:false}")
-  private boolean enforce;
 
   private final web.user.UserRepository userRepo;
   private final UserRoleRepository userRoleRepo;
@@ -80,9 +76,6 @@ public class AuthorizationService {
 
   // Build additional filter for viewing Users based on scopes.
   public Specification<UserEntity> userViewSpecForUserId(String userId) {
-    if (!enforce) {
-      return (root, cq, cb) -> cb.conjunction();
-    }
     if (userId == null) {
       return (root, cq, cb) -> cb.disjunction(); // deny
     }

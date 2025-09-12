@@ -1,0 +1,20 @@
+-- V9__rbac_add_audit_columns_to_links.sql
+-- Add audit and soft delete columns to link tables to match entity BaseEntity
+
+ALTER TABLE user_roles
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ NULL,
+  ADD COLUMN IF NOT EXISTS updated_by CHAR(26) NULL,
+  ADD COLUMN IF NOT EXISTS deleted_by CHAR(26) NULL;
+
+ALTER TABLE role_permissions
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ NULL,
+  ADD COLUMN IF NOT EXISTS updated_by CHAR(26) NULL,
+  ADD COLUMN IF NOT EXISTS deleted_by CHAR(26) NULL;
+
+ALTER TABLE user_scope
+  ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ADD COLUMN IF NOT EXISTS deleted_at TIMESTAMPTZ NULL,
+  ADD COLUMN IF NOT EXISTS updated_by CHAR(26) NULL,
+  ADD COLUMN IF NOT EXISTS deleted_by CHAR(26) NULL;

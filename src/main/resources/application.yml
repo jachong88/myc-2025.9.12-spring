@@ -23,7 +23,3 @@ management:
     web:
       exposure:
         include: health,info
-
-app:
-  rbac:
-    enforce: false
