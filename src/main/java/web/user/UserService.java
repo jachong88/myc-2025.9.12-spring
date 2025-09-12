@@ -21,9 +21,13 @@ import java.time.Instant;
 public class UserService {
 
   private final UserRepository repo;
+  private final web.location.CountryRepository countryRepo;
+  private final web.location.ProvinceRepository provinceRepo;
 
-  public UserService(UserRepository repo) {
+  public UserService(UserRepository repo, web.location.CountryRepository countryRepo, web.location.ProvinceRepository provinceRepo) {
     this.repo = repo;
+    this.countryRepo = countryRepo;
+    this.provinceRepo = provinceRepo;
   }
 
   @Transactional
@@ -149,14 +153,28 @@ public class UserService {
     PageRequest pr = PageRequest.of(p, s, Sort.by("createdAt").descending());
     Page<UserEntity> pageResult = repo.findAll(spec, pr);
 
+    // Batch lookup names
+    java.util.List<UserEntity> items = pageResult.getContent();
+    java.util.Set<String> countryIds = items.stream()
+        .map(UserEntity::getCountryId).filter(id -> id != null && !id.isBlank())
+        .collect(java.util.stream.Collectors.toSet());
+    java.util.Set<String> provinceIds = items.stream()
+        .map(UserEntity::getProvinceId).filter(id -> id != null && !id.isBlank())
+        .collect(java.util.stream.Collectors.toSet());
+
+    java.util.Map<String, String> countryNames = countryRepo.findAllById(countryIds).stream()
+        .collect(java.util.stream.Collectors.toMap(web.location.entity.CountryEntity::getId, web.location.entity.CountryEntity::getName));
+    java.util.Map<String, String> provinceNames = provinceRepo.findAllById(provinceIds).stream()
+        .collect(java.util.stream.Collectors.toMap(web.location.entity.ProvinceEntity::getId, web.location.entity.ProvinceEntity::getName));
+
     return pageResult.map(u -> new web.user.dto.UserListItemResponse(
         u.getId(),
         u.getFullName(),
         u.getEmail(),
         u.getPhone(),
-        u.getRoleId(), // placeholder until roles table provides a name
-        u.getCountryId(), // TODO: map to country name if reference table is present
-        u.getProvinceId()
+        u.getRoleId(), // TODO: map to role name when available
+        countryNames.get(u.getCountryId()), // STRICT: no fallback to IDs
+        provinceNames.get(u.getProvinceId()) // STRICT: no fallback to IDs
     ));
   }
 
