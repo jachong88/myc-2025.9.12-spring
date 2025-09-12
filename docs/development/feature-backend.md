@@ -1,2 +1,6 @@
 FE-001 implement foundation
+FE-002 implement user role permission scope
+
+
+
 FE-002 implement login using firebase

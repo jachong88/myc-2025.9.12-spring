@@ -1,3 +1,4 @@
+
 server:
   port: 8080
 
@@ -9,7 +10,7 @@ spring:
     serialization:
       WRITE_DATES_AS_TIMESTAMPS: false
   datasource:
-    url: jdbc:postgresql://localhost:5432/myc
+    url: jdbc:postgresql://localhost:5432/myc-2025.9.12
     username: postgres
     password: ${DB_PASSWORD:postgres}
   flyway:
