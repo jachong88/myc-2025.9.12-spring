@@ -1,6 +1,9 @@
 package web.user;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import web.common.exception.AppException;
@@ -66,6 +69,26 @@ public class UserService {
           ErrorCode.DUPLICATE_RESOURCE,
           Map.of("field", "email_or_phone"));
     }
+  }
+
+  @Transactional(readOnly = true)
+  public UserResponse getById(String id) {
+    return repo.findByIdAndDeletedAtIsNull(id)
+        .map(UserService::toResponse)
+        .orElseThrow(() -> new AppException(
+            ErrorCode.RESOURCE_NOT_FOUND,
+            Map.of("id", id)));
+  }
+
+  @Transactional(readOnly = true)
+  public Page<UserResponse> list(int page, int size) {
+    if (page < 0 || size <= 0 || size > 200) {
+      throw new AppException(
+          ErrorCode.ARGUMENT_INVALID,
+          Map.of("page", page, "size", size));
+    }
+    PageRequest pr = PageRequest.of(page, size, Sort.by("createdAt").descending());
+    return repo.findByDeletedAtIsNull(pr).map(UserService::toResponse);
   }
 
   private static UserResponse toResponse(UserEntity e) {
