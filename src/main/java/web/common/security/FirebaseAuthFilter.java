@@ -21,8 +21,8 @@ public class FirebaseAuthFilter extends OncePerRequestFilter {
 
   private final FirebaseAuth firebaseAuth;
 
-  public FirebaseAuthFilter(FirebaseAuth firebaseAuth) {
-    this.firebaseAuth = firebaseAuth;
+  public FirebaseAuthFilter(java.util.Optional<FirebaseAuth> firebaseAuth) {
+    this.firebaseAuth = firebaseAuth.orElse(null);
   }
 
   @Override
@@ -30,7 +30,7 @@ public class FirebaseAuthFilter extends OncePerRequestFilter {
       throws ServletException, IOException {
 
     String authHeader = request.getHeader("Authorization");
-    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+    if (firebaseAuth != null && authHeader != null && authHeader.startsWith("Bearer ")) {
       String token = authHeader.substring(7);
       try {
         FirebaseToken decoded = firebaseAuth.verifyIdToken(token, true);
