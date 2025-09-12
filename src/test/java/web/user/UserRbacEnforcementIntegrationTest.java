@@ -78,4 +78,52 @@ class UserRbacEnforcementIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.success").value(true));
   }
+
+  @Test
+  void user_create_denied_without_permissions() throws Exception {
+    String token = "noperms-token";
+    mockAuth(token, "no.perms@example.com");
+
+    UserCreateRequest req = new UserCreateRequest("noauth.create@example.com", null, "No Auth", null, null, null, null);
+    mvc.perform(post("/api/v1/users")
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(req)))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+  }
+
+  @Test
+  void user_update_delete_denied_without_permissions() throws Exception {
+    // First create a target user using HQ account
+    String adminToken = "admin-token";
+    mockAuth(adminToken, "creator@example.com");
+    UserCreateRequest req = new UserCreateRequest("target.update@example.com", null, "Target Update", null, null, null, null);
+    String created = mvc.perform(post("/api/v1/users")
+            .header("Authorization", "Bearer " + adminToken)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(req)))
+        .andExpect(status().isCreated())
+        .andReturn().getResponse().getContentAsString();
+    String id = objectMapper.readTree(created).at("/data/id").asText();
+
+    // Now attempt update/delete as a user with no permissions
+    String token = "noperms-token2";
+    mockAuth(token, "another.no.perms@example.com");
+
+    mvc.perform(patch("/api/v1/users/{id}", id)
+            .header("Authorization", "Bearer " + token)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content("{\"fullName\":\"Should Not Update\"}"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+
+    mvc.perform(delete("/api/v1/users/{id}", id)
+            .header("Authorization", "Bearer " + token))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.success").value(false))
+        .andExpect(jsonPath("$.error.code").value("ACCESS_DENIED"));
+  }
 }
