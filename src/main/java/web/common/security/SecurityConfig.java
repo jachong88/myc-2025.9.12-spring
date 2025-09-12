@@ -47,7 +47,7 @@ public class SecurityConfig {
         .requestMatchers(HttpMethod.GET, "/api/v1/health").permitAll()
         .requestMatchers("/actuator/**", "/error").permitAll()
         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-        .anyRequest().permitAll() // temporarily permit all to verify startup; tighten later
+.anyRequest().authenticated()
       )
       .addFilterBefore(firebaseAuthFilter, UsernamePasswordAuthenticationFilter.class)
       .httpBasic(Customizer.withDefaults());
