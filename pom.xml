@@ -158,6 +158,15 @@
 							<version>${querydsl.version}</version>
 							<classifier>jakarta</classifier>
 						</path>
+						<!-- Ensure APT can see JPA annotations on processor path -->
+						<path>
+							<groupId>jakarta.persistence</groupId>
+							<artifactId>jakarta.persistence-api</artifactId>
+						</path>
+						<path>
+							<groupId>jakarta.annotation</groupId>
+							<artifactId>jakarta.annotation-api</artifactId>
+						</path>
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
