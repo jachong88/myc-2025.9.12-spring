@@ -77,7 +77,7 @@ public class SecurityConfig {
     };
   }
 
-  private void writeEnvelope(javax.servlet.http.HttpServletResponse response, HttpStatus status, ApiResponse<?> body) throws IOException {
+  private void writeEnvelope(jakarta.servlet.http.HttpServletResponse response, HttpStatus status, ApiResponse<?> body) throws IOException {
     response.setStatus(status.value());
     response.setCharacterEncoding(StandardCharsets.UTF_8.name());
     response.setContentType(MediaType.APPLICATION_JSON_VALUE);
