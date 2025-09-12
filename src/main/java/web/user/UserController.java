@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import web.common.dto.ApiResponse;
 import web.common.request.RequestIdHolder;
 import web.user.dto.UserCreateRequest;
+import web.user.dto.UserUpdateRequest;
 import web.user.dto.UserResponse;
 
 import java.net.URI;
@@ -60,5 +61,22 @@ public class UserController {
         "hasNext", result.hasNext()
     );
     return ResponseEntity.ok(ApiResponse.success(rid, result.getContent(), meta));
+  }
+
+  @PatchMapping("/{id}")
+  @Operation(summary = "Update user (partial)")
+  public ResponseEntity<ApiResponse<UserResponse>> update(@PathVariable String id,
+                                                          @Valid @RequestBody UserUpdateRequest req) {
+    UserResponse data = service.update(id, req);
+    String rid = RequestIdHolder.getOrCreate();
+    return ResponseEntity.ok(ApiResponse.success(rid, data, null));
+  }
+
+  @DeleteMapping("/{id}")
+  @Operation(summary = "Soft delete user")
+  public ResponseEntity<ApiResponse<Void>> delete(@PathVariable String id) {
+    service.softDelete(id);
+    String rid = RequestIdHolder.getOrCreate();
+    return ResponseEntity.ok(ApiResponse.success(rid, null, null));
   }
 }
