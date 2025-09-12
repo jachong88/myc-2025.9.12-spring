@@ -179,14 +179,15 @@ public class AuthorizationService {
   }
 
   public boolean canDeleteUser(String actorUserId, UserEntity target) {
+    // Explicitly forbid self-deletion regardless of permissions
+    if (actorUserId != null && actorUserId.equals(target.getId())) {
+      return false;
+    }
+
     List<PermissionEntity> perms = loadPermissions(actorUserId, "USER", "DELETE");
     if (perms.isEmpty()) return false;
     if (perms.stream().anyMatch(p -> "DENY".equalsIgnoreCase(p.getEffect()))) return false;
     if (perms.stream().anyMatch(p -> "GLOBAL".equalsIgnoreCase(p.getScope()))) return true;
-
-    // SELF scope
-    boolean hasSelf = perms.stream().anyMatch(p -> "SELF".equalsIgnoreCase(p.getScope()));
-    if (hasSelf && target.getId().equals(actorUserId)) return true;
 
     // Country / Province scoped
     List<UserScopeEntity> scopes = userScopeRepo.findByUserId(actorUserId);
