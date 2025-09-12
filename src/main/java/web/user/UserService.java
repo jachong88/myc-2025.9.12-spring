@@ -23,11 +23,13 @@ public class UserService {
   private final UserRepository repo;
   private final web.location.CountryRepository countryRepo;
   private final web.location.ProvinceRepository provinceRepo;
+  private final web.rbac.AuthorizationService authz;
 
-  public UserService(UserRepository repo, web.location.CountryRepository countryRepo, web.location.ProvinceRepository provinceRepo) {
+  public UserService(UserRepository repo, web.location.CountryRepository countryRepo, web.location.ProvinceRepository provinceRepo, web.rbac.AuthorizationService authz) {
     this.repo = repo;
     this.countryRepo = countryRepo;
     this.provinceRepo = provinceRepo;
+    this.authz = authz;
   }
 
   @Transactional
@@ -94,7 +96,13 @@ public class UserService {
           Map.of("page", page, "size", size));
     }
     PageRequest pr = PageRequest.of(page, size, Sort.by("createdAt").descending());
-    return repo.findByDeletedAtIsNull(pr).map(UserService::toResponse);
+
+    String currentEmail = web.common.security.CurrentUser.email().orElse(null);
+    String currentUserId = (currentEmail == null) ? null : authz.resolveUserIdByEmail(currentEmail).orElse(null);
+    org.springframework.data.jpa.domain.Specification<web.user.entity.UserEntity> scopeSpec = authz.userViewSpecForUserId(currentUserId);
+
+    return repo.findAll(scopeSpec.and((root, cq, cb) -> cb.isNull(root.get("deletedAt"))), pr)
+        .map(UserService::toResponse);
   }
 
   @Transactional(readOnly = true)
@@ -151,7 +159,12 @@ public class UserService {
     };
 
     PageRequest pr = PageRequest.of(p, s, Sort.by("createdAt").descending());
-    Page<UserEntity> pageResult = repo.findAll(spec, pr);
+
+    String currentEmail2 = web.common.security.CurrentUser.email().orElse(null);
+    String currentUserId2 = (currentEmail2 == null) ? null : authz.resolveUserIdByEmail(currentEmail2).orElse(null);
+    org.springframework.data.jpa.domain.Specification<UserEntity> scopeSpec2 = authz.userViewSpecForUserId(currentUserId2);
+
+    Page<UserEntity> pageResult = repo.findAll(spec.and(scopeSpec2), pr);
 
     // Batch lookup names
     java.util.List<UserEntity> items = pageResult.getContent();
