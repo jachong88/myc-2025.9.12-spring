@@ -46,6 +46,13 @@ public class UserService {
     String email = hasEmail ? req.email().trim().toLowerCase() : null;
     String phone = hasPhone ? req.phone().trim() : null;
 
+    // Authorization: actor must have USER:CREATE with appropriate scope
+    String actorEmail = web.common.security.CurrentUser.email().orElse(null);
+    String actorUserId = (actorEmail == null) ? null : authz.resolveUserIdByEmail(actorEmail).orElse(null);
+    if (!authz.canCreateUser(actorUserId, req.countryId(), req.provinceId())) {
+      throw new AppException(ErrorCode.ACCESS_DENIED, Map.of("action", "USER:CREATE"));
+    }
+
     // Pre-check duplicates for clearer errors (active rows only)
     if (email != null && repo.findByEmailIgnoreCaseAndDeletedAtIsNull(email).isPresent()) {
       throw new AppException(
@@ -207,6 +214,13 @@ public class UserService {
     UserEntity e = repo.findByIdAndDeletedAtIsNull(id).orElseThrow(() ->
         new AppException(ErrorCode.RESOURCE_NOT_FOUND, Map.of("id", id)));
 
+    // Authorization: actor must have USER:UPDATE with appropriate scope
+    String actorEmail = web.common.security.CurrentUser.email().orElse(null);
+    String actorUserId = (actorEmail == null) ? null : authz.resolveUserIdByEmail(actorEmail).orElse(null);
+    if (!authz.canUpdateUser(actorUserId, e)) {
+      throw new AppException(ErrorCode.ACCESS_DENIED, Map.of("action", "USER:UPDATE", "id", id));
+    }
+
     if (req.email() != null) {
       String newEmail = req.email().trim().toLowerCase();
       if (newEmail.isBlank()) {
@@ -262,6 +276,14 @@ public class UserService {
   public void softDelete(String id) {
     UserEntity e = repo.findByIdAndDeletedAtIsNull(id).orElseThrow(() ->
         new AppException(ErrorCode.RESOURCE_NOT_FOUND, Map.of("id", id)));
+
+    // Authorization: actor must have USER:DELETE with appropriate scope
+    String actorEmail = web.common.security.CurrentUser.email().orElse(null);
+    String actorUserId = (actorEmail == null) ? null : authz.resolveUserIdByEmail(actorEmail).orElse(null);
+    if (!authz.canDeleteUser(actorUserId, e)) {
+      throw new AppException(ErrorCode.ACCESS_DENIED, Map.of("action", "USER:DELETE", "id", id));
+    }
+
     e.setDeletedAt(Instant.now());
     repo.save(e);
   }

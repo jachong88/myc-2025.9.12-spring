@@ -1,35 +1,80 @@
 /docs
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
 
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
-
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
-
-### IntelliJ IDEA ###
-.idea
-*.iws
+# =========================
+# IDEs
+# =========================
+# IntelliJ IDEA
+.idea/
 *.iml
-*.ipr
+*.iws
+out/
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
 
-### VS Code ###
+# VS Code
 .vscode/
+
+# =========================
+# Build / Packaging
+# =========================
+target/
+build/
+out/
+!src/main/**/build/
+!src/test/**/build/
+
+# =========================
+# Logs / Temp
+# =========================
+*.log
+*.tmp
+*.swp
+*.bak
+*.pid
+
+# =========================
+# Spring Boot
+# =========================
+# Exclude embedded Tomcat/Jetty temp dirs
+.spring-boot-devtools.properties
+.spring-boot-devtools.json
+
+# =========================
+# Environment / Security
+# =========================
+*.env
+*.env.local
+*.env.*.local
+*.properties
+*.yml
+application-*.yml
+application-*.properties
+firebase-service-account.json
+secret-keys.json
+jwt-*.key
+
+# =========================
+# Testcontainers / Docker
+# =========================
+# Testcontainers local files
+.testcontainers/
+.tc/
+# Sometimes Testcontainers creates temp dirs or config files
+tmp-testcontainers-*/
+
+# Docker
+docker-compose.override.yml
+docker-compose.override.yaml
+.docker/
+docker-data/
+**/docker-volume/*
+**/db-data/*
