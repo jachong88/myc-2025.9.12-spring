@@ -162,10 +162,21 @@ public class UserService {
         .map(UserEntity::getProvinceId).filter(id -> id != null && !id.isBlank())
         .collect(java.util.stream.Collectors.toSet());
 
-    java.util.Map<String, String> countryNames = countryRepo.findAllById(countryIds).stream()
+    // Resolve by ULID id and also by ISO code2 if provided instead of ULID
+    java.util.Set<String> countryIdsUlid = countryIds.stream().filter(id -> id.length() == 26).collect(java.util.stream.Collectors.toSet());
+    java.util.Set<String> countryCodes2 = countryIds.stream().filter(id -> id.length() == 2).collect(java.util.stream.Collectors.toSet());
+
+    java.util.Map<String, String> countryNamesById = countryRepo.findAllById(countryIdsUlid).stream()
         .collect(java.util.stream.Collectors.toMap(web.location.entity.CountryEntity::getId, web.location.entity.CountryEntity::getName));
-    java.util.Map<String, String> provinceNames = provinceRepo.findAllById(provinceIds).stream()
+    java.util.Map<String, String> countryNamesByCode2 = countryRepo.findByCodeInIgnoreCase(countryCodes2).stream()
+        .collect(java.util.stream.Collectors.toMap(c -> c.getCode(), web.location.entity.CountryEntity::getName, (a,b)->a, java.util.LinkedHashMap::new));
+    java.util.Set<String> provinceIdsUlid = provinceIds.stream().filter(id -> id.length() == 26).collect(java.util.stream.Collectors.toSet());
+    java.util.Set<String> provinceCodes = provinceIds.stream().filter(id -> id.length() != 26).collect(java.util.stream.Collectors.toSet());
+
+    java.util.Map<String, String> provinceNamesById = provinceRepo.findAllById(provinceIdsUlid).stream()
         .collect(java.util.stream.Collectors.toMap(web.location.entity.ProvinceEntity::getId, web.location.entity.ProvinceEntity::getName));
+    java.util.Map<String, String> provinceNamesByCode = provinceRepo.findByCodeInIgnoreCase(provinceCodes).stream()
+        .collect(java.util.stream.Collectors.toMap(web.location.entity.ProvinceEntity::getCode, web.location.entity.ProvinceEntity::getName, (a,b)->a, java.util.LinkedHashMap::new));
 
     return pageResult.map(u -> new web.user.dto.UserListItemResponse(
         u.getId(),
@@ -173,8 +184,8 @@ public class UserService {
         u.getEmail(),
         u.getPhone(),
         u.getRoleId(), // TODO: map to role name when available
-        countryNames.get(u.getCountryId()), // STRICT: no fallback to IDs
-        provinceNames.get(u.getProvinceId()) // STRICT: no fallback to IDs
+        (u.getCountryId() == null ? null : (u.getCountryId().length() == 26 ? countryNamesById.get(u.getCountryId()) : countryNamesByCode2.get(u.getCountryId()))),
+        (u.getProvinceId() == null ? null : (u.getProvinceId().length() == 26 ? provinceNamesById.get(u.getProvinceId()) : provinceNamesByCode.get(u.getProvinceId())))
     ));
   }
 

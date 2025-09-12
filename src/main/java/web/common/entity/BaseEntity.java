@@ -24,6 +24,9 @@ public abstract class BaseEntity {
   @Column(name = "updated_by", length = 26)
   private String updatedBy;
 
+  @Column(name = "deleted_by", length = 26)
+  private String deletedBy;
+
   @PrePersist
   protected void onCreate() {
     Instant now = Instant.now();
@@ -50,4 +53,7 @@ public abstract class BaseEntity {
 
   public String getUpdatedBy() { return updatedBy; }
   public void setUpdatedBy(String updatedBy) { this.updatedBy = updatedBy; }
+
+  public String getDeletedBy() { return deletedBy; }
+  public void setDeletedBy(String deletedBy) { this.deletedBy = deletedBy; }
 }
