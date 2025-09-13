@@ -10,14 +10,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.context.annotation.Import;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
+import org.springframework.test.context.jdbc.Sql;
 import web.user.dto.UserCreateRequest;
+import com.web.TestcontainersConfiguration;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,7 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(classes = com.web.WebApplication.class)
 @AutoConfigureMockMvc
-@Import(UserControllerIntegrationTest.LocalTestcontainersConfig.class)
+@Import(TestcontainersConfiguration.class)
+@Sql(scripts = {"classpath:sql/truncate_all.sql", "classpath:sql/test_seed.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class UserControllerIntegrationTest {
 
   @Autowired
@@ -37,15 +35,6 @@ class UserControllerIntegrationTest {
 
   @MockBean
   FirebaseAuth firebaseAuth;
-
-  @TestConfiguration(proxyBeanMethods = false)
-  static class LocalTestcontainersConfig {
-    @Bean
-    @ServiceConnection
-    PostgreSQLContainer<?> postgresContainer() {
-      return new PostgreSQLContainer<>(DockerImageName.parse("postgres:latest"));
-    }
-  }
 
   @Test
   void create_user_success() throws Exception {
@@ -72,6 +61,7 @@ class UserControllerIntegrationTest {
         .andExpect(header().string("Location", startsWith("/api/v1/users/")))
         .andExpect(jsonPath("$.success").value(true))
         .andExpect(jsonPath("$.data.id", not(emptyString())))
+        .andExpect(jsonPath("$.data.id", matchesPattern("^[0-9A-HJKMNP-TV-Z]{26}$")))
         .andExpect(jsonPath("$.data.email").value("new.user@example.com"))
         .andExpect(jsonPath("$.data.fullName").value("New User"));
   }
@@ -98,7 +88,8 @@ class UserControllerIntegrationTest {
             .header("Authorization", "Bearer " + token)
             .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(req)))
-        .andExpect(status().isCreated());
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.data.id", matchesPattern("^[0-9A-HJKMNP-TV-Z]{26}$")));
 
     // Second create with same email -> conflict
     mvc.perform(post("/api/v1/users")

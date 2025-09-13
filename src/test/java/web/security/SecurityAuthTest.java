@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
 import web.common.dto.ApiResponse;
 import web.common.request.RequestIdHolder;
 
@@ -24,7 +25,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest(classes = com.web.WebApplication.class)
 @AutoConfigureMockMvc
-@Import(SecurityAuthTest.ProtectedController.class)
+@Import({SecurityAuthTest.ProtectedController.class, com.web.TestcontainersConfiguration.class})
+@Sql(scripts = {"classpath:sql/truncate_all.sql", "classpath:sql/test_seed.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class SecurityAuthTest {
 
   @Autowired

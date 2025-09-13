@@ -190,10 +190,14 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<useModulePath>false</useModulePath>
+					<excludes>
+						<exclude>**/*IT.java</exclude>
+						<exclude>**/*IntegrationTest.java</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 
-			<!-- Integration tests (*IT.java) -->
+			<!-- Integration tests (*IT.java, *IntegrationTest.java) -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
@@ -206,7 +210,71 @@
 						<configuration>
 							<includes>
 								<include>**/*IT.java</include>
+								<include>**/*IntegrationTest.java</include>
 							</includes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- Flyway DB Migration -->
+			<plugin>
+				<groupId>org.flywaydb</groupId>
+				<artifactId>flyway-maven-plugin</artifactId>
+				<version>11.7.2</version>
+				<configuration>
+					<url>jdbc:postgresql://localhost:5432/myc-2025.9.12</url>
+					<user>postgres</user>
+					<password>${env.DB_PASSWORD}</password>
+					<locations>filesystem:src/main/resources/db/migration</locations>
+					<baselineOnMigrate>true</baselineOnMigrate>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>42.7.4</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
+			<!-- Coverage -->
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.12</version>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>report</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>report</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>check</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>check</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<rule>
+									<element>BUNDLE</element>
+									<limits>
+										<limit>
+											<counter>INSTRUCTION</counter>
+											<value>COVEREDRATIO</value>
+<minimum>0.38</minimum>
+										</limit>
+									</limits>
+								</rule>
+							</rules>
 						</configuration>
 					</execution>
 				</executions>

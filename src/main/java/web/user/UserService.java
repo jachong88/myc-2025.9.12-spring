@@ -195,8 +195,8 @@ public class UserService {
 
     java.util.Map<String, String> provinceNamesById = provinceRepo.findAllById(provinceIdsUlid).stream()
         .collect(java.util.stream.Collectors.toMap(web.location.entity.ProvinceEntity::getId, web.location.entity.ProvinceEntity::getName));
-    java.util.Map<String, String> provinceNamesByCode = provinceRepo.findByCodeInIgnoreCase(provinceCodes).stream()
-        .collect(java.util.stream.Collectors.toMap(web.location.entity.ProvinceEntity::getCode, web.location.entity.ProvinceEntity::getName, (a,b)->a, java.util.LinkedHashMap::new));
+    java.util.Map<String, String> provinceNamesByCode = provinceRepo.findByProvinceCodeInIgnoreCase(provinceCodes).stream()
+        .collect(java.util.stream.Collectors.toMap(web.location.entity.ProvinceEntity::getProvinceCode, web.location.entity.ProvinceEntity::getName, (a,b)->a, java.util.LinkedHashMap::new));
 
     return pageResult.map(u -> new web.user.dto.UserListItemResponse(
         u.getId(),

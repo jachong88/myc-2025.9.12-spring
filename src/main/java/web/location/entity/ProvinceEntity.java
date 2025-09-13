@@ -12,11 +12,11 @@ public class ProvinceEntity extends web.common.entity.BaseEntity {
   @Column(name = "id", length = 26, nullable = false)
   private String id;
 
-  @Column(name = "country_id", length = 26)
-  private String countryId;
+  @Column(name = "country_code", length = 2, nullable = false)
+  private String countryCode;
 
-  @Column(name = "code", length = 10)
-  private String code;
+  @Column(name = "province_code", length = 10)
+  private String provinceCode;
 
   @Column(name = "name", length = 100)
   private String name;
@@ -27,11 +27,11 @@ public class ProvinceEntity extends web.common.entity.BaseEntity {
   public String getId() { return id; }
   public void setId(String id) { this.id = id; }
 
-  public String getCountryId() { return countryId; }
-  public void setCountryId(String countryId) { this.countryId = countryId; }
+  public String getCountryCode() { return countryCode; }
+  public void setCountryCode(String countryCode) { this.countryCode = countryCode; }
 
-  public String getCode() { return code; }
-  public void setCode(String code) { this.code = code; }
+  public String getProvinceCode() { return provinceCode; }
+  public void setProvinceCode(String provinceCode) { this.provinceCode = provinceCode; }
 
   public String getName() { return name; }
   public void setName(String name) { this.name = name; }
