@@ -1,6 +1,7 @@
 // run with local
-•  mvn -q spring-boot:run -D"spring-boot.run.profiles=local"
+mvn -q spring-boot:run -D"spring-boot.run.profiles=local"
 
+// run withou local
 ./mvnw.cmd -DskipTests spring-boot:run
 
 // to see log

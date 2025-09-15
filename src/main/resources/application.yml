@@ -18,6 +18,16 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: true
 
+# Default CORS policy (override per profile as needed)
+cors:
+  allowed-origins:
+    - https://app.myc.ai
+  allowed-methods: [GET,POST,PUT,PATCH,DELETE]
+  allowed-headers: [Authorization,Content-Type,X-Requested-With]
+  exposed-headers: [Location,X-Request-Id]
+  allow-credentials: true
+  max-age: 3600
+
 management:
   endpoints:
     web:
