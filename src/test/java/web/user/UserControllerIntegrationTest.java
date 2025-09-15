@@ -13,15 +13,16 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
+
+import web.TestcontainersConfiguration;
 import web.user.dto.UserCreateRequest;
-import com.web.TestcontainersConfiguration;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest(classes = com.web.WebApplication.class)
+@SpringBootTest(classes = web.WebApplication.class)
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
 @Sql(scripts = {"classpath:sql/truncate_all.sql", "classpath:sql/test_seed.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)

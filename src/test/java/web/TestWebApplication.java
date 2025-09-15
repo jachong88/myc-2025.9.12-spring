@@ -1,6 +1,8 @@
-package com.web;
+package web;
 
 import org.springframework.boot.SpringApplication;
+
+import web.WebApplication;
 
 public class TestWebApplication {
 

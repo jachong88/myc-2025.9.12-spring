@@ -37,6 +37,7 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
+      .cors(Customizer.withDefaults())
       .csrf(csrf -> csrf.disable())
       .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
       .exceptionHandling(h -> h
@@ -44,10 +45,11 @@ public class SecurityConfig {
         .accessDeniedHandler(accessDeniedHandler())
       )
       .authorizeHttpRequests(auth -> auth
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
         .requestMatchers(HttpMethod.GET, "/api/v1/health").permitAll()
         .requestMatchers("/actuator/**", "/error").permitAll()
         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-.anyRequest().authenticated()
+        .anyRequest().authenticated()
       )
       .addFilterBefore(firebaseAuthFilter, UsernamePasswordAuthenticationFilter.class)
       .httpBasic(Customizer.withDefaults());

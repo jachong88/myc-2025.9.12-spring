@@ -1,9 +1,9 @@
-package com.web;
+package web;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = {"com.web", "web"})
+@SpringBootApplication(scanBasePackages = {"web"})
 public class WebApplication {
 
 	public static void main(String[] args) {
