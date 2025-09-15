@@ -14,11 +14,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional(readOnly = true)
 public class PostalCodeReferenceService {
 
+  private static final Logger logger = LoggerFactory.getLogger(PostalCodeReferenceService.class);
   private final PostalCodeReferenceRepository postalCodeRepository;
 
   // Postal code validation patterns for common countries
@@ -321,6 +325,85 @@ public class PostalCodeReferenceService {
         yield normalized;
       }
       default -> normalized.replaceAll("\\s+", ""); // Remove spaces for other countries
+    };
+  }
+
+  /**
+   * Search postal codes for autocomplete functionality
+   */
+  public List<web.studio.dto.StudioResponse.PostalCodeResponse> searchForAutocomplete(
+          String query, int limit, String countryCode) {
+    
+    logger.debug("Searching postal codes for autocomplete: {} (country: {}, limit: {})", 
+                query, countryCode, limit);
+    
+    // Validate inputs
+    if (query == null || query.trim().length() < 2) {
+      return List.of();
+    }
+    
+    // Clean and normalize query
+    String cleanQuery = query.trim().toUpperCase();
+    
+    // Search using repository with prefix matching - use existing searchPostalCodes method
+    Page<PostalCodeReferenceEntity> results = searchPostalCodes(
+        countryCode, cleanQuery, 0, Math.min(limit, 50));
+    
+    // Convert to a generic postal code DTO suitable for autocomplete
+    return results.getContent().stream()
+        .map(pcr -> {
+          web.studio.dto.StudioResponse.PostalCodeResponse r = new web.studio.dto.StudioResponse.PostalCodeResponse();
+          r.setId(pcr.getId());
+          r.setPostalCode(pcr.getPostalCode());
+          r.setCity(pcr.getCity());
+          r.setProvinceCode(pcr.getProvinceCode());
+          r.setCountryCode(pcr.getCountryCode());
+          r.setProvinceName(getProvinceName(pcr.getProvinceCode(), pcr.getCountryCode()));
+          r.setCountryName(getCountryName(pcr.getCountryCode()));
+          return r;
+        })
+        .collect(Collectors.toList());
+  }
+  
+  /**
+   * Get province name by code (placeholder - implement with proper province lookup)
+   */
+  private String getProvinceName(String provinceCode, String countryCode) {
+    // TODO: Implement proper province name lookup from province table
+    return switch (countryCode + "-" + provinceCode) {
+      case "SG-SG" -> "Singapore";
+      case "MY-01" -> "Johor";
+      case "MY-02" -> "Kedah";
+      case "MY-03" -> "Kelantan";
+      case "MY-04" -> "Melaka";
+      case "MY-05" -> "Negeri Sembilan";
+      case "MY-06" -> "Pahang";
+      case "MY-07" -> "Pulau Pinang";
+      case "MY-08" -> "Perak";
+      case "MY-09" -> "Perlis";
+      case "MY-10" -> "Selangor";
+      case "MY-11" -> "Terengganu";
+      case "MY-12" -> "Sabah";
+      case "MY-13" -> "Sarawak";
+      case "MY-14" -> "Kuala Lumpur";
+      case "MY-15" -> "Labuan";
+      case "MY-16" -> "Putrajaya";
+      default -> provinceCode; // Fallback to code
+    };
+  }
+  
+  /**
+   * Get country name by code (placeholder - implement with proper country lookup)
+   */
+  private String getCountryName(String countryCode) {
+    // TODO: Implement proper country name lookup from country table
+    return switch (countryCode) {
+      case "SG" -> "Singapore";
+      case "MY" -> "Malaysia";
+      case "US" -> "United States";
+      case "CA" -> "Canada";
+      case "GB", "UK" -> "United Kingdom";
+      default -> countryCode; // Fallback to code
     };
   }
 }

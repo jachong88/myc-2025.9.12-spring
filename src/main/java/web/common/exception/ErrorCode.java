@@ -11,7 +11,18 @@ public enum ErrorCode {
   DUPLICATE_RESOURCE("DUPLICATE_RESOURCE", "error.duplicate_resource", HttpStatus.CONFLICT),
   CONFLICT("CONFLICT", "error.conflict", HttpStatus.CONFLICT),
   RATE_LIMITED("RATE_LIMITED", "error.rate_limited", HttpStatus.TOO_MANY_REQUESTS),
-  INTERNAL("INTERNAL", "error.internal", HttpStatus.INTERNAL_SERVER_ERROR);
+  INTERNAL("INTERNAL", "error.internal", HttpStatus.INTERNAL_SERVER_ERROR),
+
+  // User-specific error codes
+  USER_NOT_FOUND("USER_NOT_FOUND", "error.user_not_found", HttpStatus.NOT_FOUND),
+
+  // Postal code-specific error codes
+  POSTAL_CODE_NOT_FOUND("POSTAL_CODE_NOT_FOUND", "error.postal_code_not_found", HttpStatus.NOT_FOUND),
+
+  // Studio-specific error codes
+  STUDIO_NOT_FOUND("STUDIO_NOT_FOUND", "error.studio_not_found", HttpStatus.NOT_FOUND),
+  STUDIO_EMAIL_ALREADY_EXISTS("STUDIO_EMAIL_ALREADY_EXISTS", "error.studio_email_already_exists", HttpStatus.CONFLICT),
+  STUDIO_CODE_ALREADY_EXISTS("STUDIO_CODE_ALREADY_EXISTS", "error.studio_code_already_exists", HttpStatus.CONFLICT);
 
   private final String code;
   private final String messageKey;

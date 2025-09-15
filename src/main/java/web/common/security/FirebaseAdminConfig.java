@@ -4,15 +4,13 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConditionalOnExpression("T(java.lang.System).getenv('GOOGLE_APPLICATION_CREDENTIALS') != null && new java.io.File(T(java.lang.System).getenv('GOOGLE_APPLICATION_CREDENTIALS')).exists()")
+@ConditionalOnProperty(value = "firebase.enabled", havingValue = "true", matchIfMissing = true)
 public class FirebaseAdminConfig {
 
   @Bean

@@ -7,4 +7,8 @@ public final class Ulids {
   public static String newUlid() {
     return UlidCreator.getUlid().toString();
   }
+  // Backward compatibility for existing code/tests
+  public static String generate() {
+    return newUlid();
+  }
 }

@@ -300,5 +300,6 @@ public class PostalCodeController {
     
     String rid = RequestIdHolder.getOrCreate();
     return ResponseEntity.ok(ApiResponse.success(rid, null, null));
-  }
+    }
+
 }
